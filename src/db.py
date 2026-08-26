@@ -30,7 +30,10 @@ def fetch_one(sql, params=None):
     try:
         with conn.cursor() as cur:
             cur.execute(sql, params)
-            return cur.fetchone()
+            conn.commit()
+            if cur.description:
+                return cur.fetchone()
+            return None
     finally:
         conn.close()
 
@@ -41,7 +44,9 @@ def execute(sql, params=None):
         with conn.cursor() as cur:
             cur.execute(sql, params)
             conn.commit()
-            return cur.fetchall()
+            if cur.description:
+                return cur.fetchall()
+            return []
     finally:
         conn.close()
 

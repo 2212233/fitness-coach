@@ -2,8 +2,10 @@ import os
 import json
 import requests
 
-API_KEY = os.environ["GEMINI_API_KEY"]
-URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+# Primary: Groq (free tier, generous limits)
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "openai/gpt-oss-20b"
 
 PARSE_PROMPT = """You are a fitness data parser. Given a transcript of what someone said to their coach, extract structured data.
 
@@ -28,18 +30,28 @@ Rules:
 - Return ONLY the JSON, no markdown, no explanation"""
 
 
-def parse_transcript(transcript):
+def _chat(prompt, max_tokens=1024):
     payload = {
-        "contents": [{"parts": [{"text": PARSE_PROMPT.format(transcript=transcript)}]}]
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": 0.1,
     }
     r = requests.post(
-        URL,
-        headers={"Content-Type": "application/json", "X-goog-api-key": API_KEY},
+        GROQ_URL,
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json",
+        },
         json=payload,
         timeout=30,
     )
     r.raise_for_status()
-    text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    return r.json()["choices"][0]["message"]["content"]
+
+
+def parse_transcript(transcript):
+    text = _chat(PARSE_PROMPT.format(transcript=transcript))
     cleaned = text.replace("```json\n", "").replace("```", "").strip()
     try:
         return json.loads(cleaned)
@@ -55,12 +67,4 @@ def parse_transcript(transcript):
 
 
 def generate(prompt):
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    r = requests.post(
-        URL,
-        headers={"Content-Type": "application/json", "X-goog-api-key": API_KEY},
-        json=payload,
-        timeout=60,
-    )
-    r.raise_for_status()
-    return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    return _chat(prompt, max_tokens=2048)
