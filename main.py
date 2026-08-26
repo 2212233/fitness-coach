@@ -25,6 +25,7 @@ def ingest():
 
     count = 0
     for update in updates:
+        update_id = update.get("update_id")
         msg = update.get("message", {})
         chat_id = msg.get("chat", {}).get("id")
         if not chat_id:
@@ -48,6 +49,13 @@ def ingest():
         if not transcript and not raw_text:
             continue
 
+        existing = db.fetch_one(
+            "SELECT id FROM messages WHERE chat_id = %s AND transcript = %s AND kind = %s",
+            (chat_id, transcript, kind),
+        )
+        if existing:
+            continue
+
         db.execute(
             "INSERT INTO messages (source, chat_id, kind, raw_text, transcript, status) "
             "VALUES ('telegram', %s, %s, %s, %s, 'pending')",
@@ -55,6 +63,9 @@ def ingest():
         )
         telegram.send_message(chat_id, "Got it - logging now.")
         count += 1
+
+    if updates:
+        telegram.get_updates(offset=updates[-1]["update_id"] + 1)
 
     return count
 
