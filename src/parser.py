@@ -2,6 +2,19 @@ from . import db
 from . import usda
 
 
+def _servings(quantity, unit):
+    unit = (unit or "g").lower()
+    if unit in ("lb", "pound", "pounds"):
+        return quantity * 453.592 / 100
+    if unit in ("oz", "ounce", "ounces"):
+        return quantity * 28.3495 / 100
+    if unit in ("kg", "kilogram", "kilograms"):
+        return quantity * 1000 / 100
+    if unit in ("ml", "l", "liter", "liters"):
+        return quantity / 100
+    return quantity / 100
+
+
 def process_message(message_id, parsed):
     chat_id = db.fetch_one(
         "SELECT chat_id FROM messages WHERE id = %s", (message_id,)
@@ -60,7 +73,7 @@ def _process_food(food, message_id):
     )
 
     if existing:
-        servings = food["quantity"] / (existing["serving_size"] or 1)
+        servings = _servings(food["quantity"], food.get("unit"))
         db.execute(
             "INSERT INTO food_log "
             "(food_id, quantity, calories, protein_g, carbs_g, fat_g, consumed_at, message_id) "
@@ -108,7 +121,7 @@ def _process_food(food, message_id):
         )
         food_id = row["id"]
 
-    servings = food["quantity"] / info["serving_size"]
+    servings = _servings(food["quantity"], food.get("unit"))
     db.execute(
         "INSERT INTO food_log "
         "(food_id, quantity, calories, protein_g, carbs_g, fat_g, consumed_at, message_id) "

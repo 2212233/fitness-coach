@@ -28,7 +28,7 @@ Rules:
 - Empty array where nothing was mentioned
 - Never invent a number the user did not say
 - Leave rir null if not mentioned
-- quantity for foods is in the unit the user said (e.g. 2 eggs, 30g whey)
+- quantity for foods is always in GRAMS, converted by you (e.g. "2 eggs" -> {{\"quantity\": 100, \"unit\": \"g\"}}, "30g whey" -> {{\"quantity\": 30, \"unit\": \"g\"}}, "a bowl of soup" -> {{\"quantity\": 250, \"unit\": \"g\"}})
 - weight_lbs for body is bodyweight
 - Return ONLY the JSON, no markdown, no explanation"""
 
