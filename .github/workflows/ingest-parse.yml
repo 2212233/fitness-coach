@@ -1,6 +1,8 @@
 name: Ingest + Parse
 
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: "*/10 * * * *"   # every 10 min, ~4,320 runs/month (free on public repo)
   workflow_dispatch:
