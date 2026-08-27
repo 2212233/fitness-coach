@@ -1,14 +1,17 @@
 import os
 import requests
 
-API_KEY = os.environ["USDA_API_KEY"]
 BASE = "https://api.nal.usda.gov/fdc/v1"
+
+
+def _api_key():
+    return os.environ["USDA_API_KEY"]
 
 
 def search_food(query, page_size=1):
     r = requests.get(
         f"{BASE}/foods/search",
-        params={"query": query, "pageSize": page_size, "api_key": API_KEY},
+        params={"query": query, "pageSize": page_size, "api_key": _api_key()},
         timeout=15,
     )
     r.raise_for_status()

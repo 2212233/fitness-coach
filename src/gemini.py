@@ -3,9 +3,12 @@ import json
 import requests
 
 # Primary: Groq (free tier, generous limits)
-GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "openai/gpt-oss-20b"
+
+
+def _api_key():
+    return os.environ["GROQ_API_KEY"]
 
 PARSE_PROMPT = """You are a fitness data parser. Given a transcript of what someone said to their coach, extract structured data.
 
@@ -40,7 +43,7 @@ def _chat(prompt, max_tokens=1024):
     r = requests.post(
         GROQ_URL,
         headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {_api_key()}",
             "Content-Type": "application/json",
         },
         json=payload,
