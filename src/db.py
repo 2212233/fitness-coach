@@ -4,8 +4,9 @@ import psycopg2.extras
 
 DB_URL = os.environ.get(
     "DATABASE_URL",
-    f"postgresql://postgres:{os.environ['SUPABASE_DB_PASSWORD']}@"
-    f"{os.environ.get('SUPABASE_DB_HOST', 'db.grkqkfaetnmwtloiouoa.supabase.co')}:"
+    f"postgresql://{os.environ.get('SUPABASE_DB_USER', 'postgres.grkqkfaetnmwtloiouoa')}:"
+    f"{os.environ['SUPABASE_DB_PASSWORD']}@"
+    f"{os.environ.get('SUPABASE_DB_HOST', 'aws-0-eu-central-1.pooler.supabase.com')}:"
     f"{os.environ.get('SUPABASE_DB_PORT', '5432')}/"
     f"{os.environ.get('SUPABASE_DB_NAME', 'postgres')}?sslmode=require"
 )
