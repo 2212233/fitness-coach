@@ -133,6 +133,12 @@ def run_coach(coach_module, name):
             print(f"{name}: no chat_id found, skipping")
             return False
         chat_id, text = result
+        text = (text or "").strip()
+        if not text:
+            print(f"{name}: coach returned empty message, skipping send")
+            return False
+        if len(text) > 4000:
+            text = text[:4000]
         telegram.send_message(chat_id, text)
         print(f"{name}: sent ({len(text)} chars)")
         return True

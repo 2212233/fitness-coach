@@ -48,6 +48,10 @@ def run():
         return None
     chat_id = chat_row["chat_id"]
 
+    has_history = any(r["sessions"] >= 3 for r in session_counts)
+    if not has_history:
+        return chat_id, "Not enough training history yet to prescribe. Keep logging sessions."
+
     prompt = f"""You are a training coach. Analyze this athlete's data and prescribe today's session.
 
 Best e1rm per day (last 28 days):

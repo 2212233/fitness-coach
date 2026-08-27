@@ -46,12 +46,16 @@ def run():
     )
 
     protein_per_lb = db.fetch_all(
-        "SELECT fl.consumed_at::date AS day, SUM(fl.protein_g) AS total_protein,"
-        "  (SELECT weight_lbs FROM body_metrics WHERE recorded_at <= fl.consumed_at"
-        "   ORDER BY recorded_at DESC LIMIT 1) AS weight_lbs"
-        " FROM food_log fl"
-        " WHERE fl.consumed_at >= (CURRENT_DATE - interval '14 days')"
-        " GROUP BY fl.consumed_at::date ORDER BY day"
+        "WITH ppd AS ("
+        "  SELECT fl.consumed_at::date AS day, SUM(fl.protein_g) AS total_protein"
+        "  FROM food_log fl"
+        "  WHERE fl.consumed_at >= (CURRENT_DATE - interval '14 days')"
+        "  GROUP BY fl.consumed_at::date"
+        ") SELECT day, total_protein,"
+        "  (SELECT weight_lbs FROM body_metrics bm"
+        "   WHERE bm.recorded_at <= (day + interval '1 day')"
+        "   ORDER BY bm.recorded_at DESC LIMIT 1) AS weight_lbs"
+        " FROM ppd ORDER BY day"
     )
 
     plan = db.fetch_all("SELECT * FROM daily_plan WHERE active = true")
