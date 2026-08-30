@@ -23,6 +23,16 @@ def send_message(chat_id, text, parse_mode=None):
     return r.json()
 
 
+def set_my_commands(commands):
+    r = requests.post(
+        f"{BASE}/setMyCommands",
+        json={"commands": commands},
+        timeout=15,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
 def download_file(file_id):
     info = requests.get(f"{BASE}/getFile", params={"file_id": file_id}, timeout=15)
     info.raise_for_status()

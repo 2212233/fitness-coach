@@ -10,11 +10,12 @@ Usage:
   python main.py head            Run weekly head coach
   python main.py coaches         Run all three coaches
   python main.py poll            Ingest + parse in a loop (for local use)
+  python main.py register        Register the bot's /command menu
 """
 import sys
 import time
 
-from src import db, telegram, groq, gemini, parser
+from src import db, telegram, groq, gemini, parser, commands
 from src.coaches import nutrition, training, head
 
 
@@ -36,6 +37,14 @@ def ingest():
         kind = "text"
         transcript = text or ""
         raw_text = text
+
+        if text and text.startswith("/"):
+            reply = commands.handle(chat_id, text)
+            if reply:
+                telegram.send_message(chat_id, reply)
+            else:
+                telegram.send_message(chat_id, "Unknown command. Use /help.")
+            continue
 
         if voice and voice.get("mime_type", "").startswith("audio/"):
             kind = "voice"
@@ -191,6 +200,9 @@ if __name__ == "__main__":
     elif cmd == "poll":
         interval = int(sys.argv[2]) if len(sys.argv) > 2 else 30
         poll(interval)
+    elif cmd == "register":
+        commands.register_menu()
+        print("Bot command menu registered")
     else:
         print(f"Unknown command: {cmd}")
         print(__doc__)
